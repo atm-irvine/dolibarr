@@ -1731,7 +1731,7 @@ class User extends CommonObject
 		$sql .= ", login = '".$this->db->escape($this->login)."'";
 		$sql .= ", api_key = ".($this->api_key ? "'".$this->db->escape($this->api_key)."'" : "null");
 		$sql .= ", gender = ".($this->gender != -1 ? "'".$this->db->escape($this->gender)."'" : "null"); // 'man' or 'woman'
-		$sql .= ", birth=".(strval($this->birth) != '' ? "'".$this->db->idate($this->birth)."'" : 'null');
+		$sql .= ", birth=".(strval($this->birth) != '' ? "'".$this->db->idate($this->birth, 'tzserver')."'" : 'null');
 		if (!empty($user->admin)) {
 			$sql .= ", admin = ".(int) $this->admin; // admin flag can be set/unset only by an admin user
 		}
@@ -3490,7 +3490,7 @@ class User extends CommonObject
 				} else {
 					$sql .= ",".MAIN_DB_PREFIX."usergroup_user as ug";
 					$sql .= " WHERE ((ug.fk_user = t.rowid";
-					$sql .= " AND ug.entity IN (".getEntity('user')."))";
+					$sql .= " AND ug.entity IN (".getEntity('usergroup')."))";
 					$sql .= " OR t.entity = 0)"; // Show always superadmin
 				}
 			} else {

@@ -508,8 +508,8 @@ if (!$error && $massaction == 'confirm_presend') {
 						$resaction .= '<div class="error">'.$mailfile->error.'</div>';
 					} else {
 						$result = $mailfile->sendfile();
-						if ($result) {
-							$resaction .= $langs->trans('MailSuccessfulySent', $mailfile->getValidAddress($from, 2), $mailfile->getValidAddress($sendto, 2)).'<br>'; // Must not contain "
+						if ($result > 0) {
+							$resaction .= $langs->trans('MailSuccessfulySent', $mailfile->getValidAddress($mailfile->addr_from, 2), $mailfile->getValidAddress($mailfile->addr_to, 2)).'<br>'; // Must not contain "
 
 							$error = 0;
 
@@ -641,6 +641,8 @@ if ($massaction == 'confirm_createbills') {   // Create bills from orders.
 	$lastref = '';
 
 	$db->begin();
+
+	$nbOrders = is_array($orders) ? count($orders) : 1;
 
 	foreach ($orders as $id_order) {
 		$cmd = new Commande($db);
@@ -774,6 +776,8 @@ if ($massaction == 'confirm_createbills') {   // Create bills from orders.
 
 						$objecttmp->context['createfromclone'];
 
+						$rankedLine = ($nbOrders > 1) ? -1 : $lines[$i]->rang;
+
 						$result = $objecttmp->addline(
 							$desc,
 							$lines[$i]->subprice,
@@ -791,7 +795,7 @@ if ($massaction == 'confirm_createbills') {   // Create bills from orders.
 							'HT',
 							0,
 							$product_type,
-							$lines[$i]->rang,
+							$rankedLine,
 							$lines[$i]->special_code,
 							$objecttmp->origin,
 							$lines[$i]->rowid,
@@ -1031,7 +1035,7 @@ if (!$error && $massaction == "builddoc" && $permissiontoread && !GETPOST('butto
 		$arrayofinclusion[] = '^'.preg_quote(dol_sanitizeFileName($tmppdf), '/').'\.pdf$';
 	}
 	foreach ($listofobjectref as $tmppdf) {
-		$arrayofinclusion[] = '^'.preg_quote(dol_sanitizeFileName($tmppdf), '/').'_[a-zA-Z0-9-_]+\.pdf$'; // To include PDF generated from ODX files
+		$arrayofinclusion[] = '^'.preg_quote(dol_sanitizeFileName($tmppdf), '/').'_[a-zA-Z0-9\-\_\'\&\.]+\.pdf$'; // To include PDF generated from ODX files
 	}
 	$listoffiles = dol_dir_list($uploaddir, 'all', 1, implode('|', $arrayofinclusion), '\.meta$|\.png', 'date', SORT_DESC, 0, true);
 
@@ -1246,9 +1250,9 @@ if (!$error && $massaction == 'validate' && $permissiontoadd) {
 						$model = $objecttmp->model_pdf;
 						$ret = $objecttmp->fetch($objecttmp->id); // Reload to get new records
 						// To be sure vars is defined
-						$hidedetails = !empty($hidedetails) ? $hidedetails : 0;
-						$hidedesc = !empty($hidedesc) ? $hidedesc : 0;
-						$hideref = !empty($hideref) ? $hideref : 0;
+						$hidedetails = !empty($hidedetails) ? $hidedetails : (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0);
+						$hidedesc = !empty($hidedesc) ? $hidedesc : (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0);
+						$hideref = !empty($hideref) ? $hideref : (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0);
 						$moreparams = !empty($moreparams) ? $moreparams : null;
 
 						$result = $objecttmp->generateDocument($model, $outputlangs, $hidedetails, $hidedesc, $hideref);
@@ -1378,13 +1382,13 @@ if (!$error && $massaction == 'generate_doc' && $permissiontoread) {
 
 			// To be sure vars is defined
 			if (empty($hidedetails)) {
-				$hidedetails = 0;
+				$hidedetails = (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DETAILS) ? 1 : 0);
 			}
 			if (empty($hidedesc)) {
-				$hidedesc = 0;
+				$hidedesc = (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_DESC) ? 1 : 0);
 			}
 			if (empty($hideref)) {
-				$hideref = 0;
+				$hideref = (!empty($conf->global->MAIN_GENERATE_DOCUMENTS_HIDE_REF) ? 1 : 0);
 			}
 			if (empty($moreparams)) {
 				$moreparams = null;
