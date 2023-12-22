@@ -208,6 +208,8 @@ $original_file = str_replace('..\\', '/', $original_file);
 
 // Find the subdirectory name as the reference
 //$refname = basename(dirname($original_file)."/");
+// DA024043 à récup du coeur quand fix final accepté
+
 
 // Security check
 if (empty($modulepart)) {
