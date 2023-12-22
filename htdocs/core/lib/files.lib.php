@@ -2295,8 +2295,9 @@ function dol_check_secure_access_document($modulepart, $original_file, $entity, 
 	// Find the subdirectory name as the reference. For example original_file='10/myfile.pdf' -> refname='10'
 	if (empty($refname)) {
 		$refname = basename(dirname($original_file)."/");
-		if ($refname == 'thumbs') {
-			// If we get the thumbns directory, we must go one step higher. For example original_file='10/thumbs/myfile_small.jpg' -> refname='10'
+		if ($refname == 'thumbs' || $refname == 'temp') {
+            // DA024043 à récup du coeur quand correction finale dans coeur
+			// If we get the thumbs or temp directory, we must go one step higher. For example original_file='10/thumbs/myfile_small.jpg' -> refname='10'
 			$refname = basename(dirname(dirname($original_file))."/");
 		}
 	}
