@@ -79,19 +79,26 @@ if ($massaction == 'presend') {
 	$listofselectedthirdparties = array();
 	$listofselectedref = array();
 
+	// backport v18 fix erreur thirdparty  fk_soc
 	if (!GETPOST('cancel', 'alpha')) {
 		foreach ($arrayofselected as $toselectid) {
 			$result = $objecttmp->fetch($toselectid);
 			if ($result > 0) {
 				$listofselectedid[$toselectid] = $toselectid;
-				$thirdpartyid = ($objecttmp->fk_soc ? $objecttmp->fk_soc : $objecttmp->socid);
-				if ($objecttmp->element == 'societe') {
+				$thirdpartyid = ($objecttmp->fk_soc ? $objecttmp->fk_soc : $objecttmp->socid);	// For proposal, order, invoice, conferenceorbooth, ...
+				if (in_array($objecttmp->element, array('societe', 'conferenceorboothattendee'))) {
 					$thirdpartyid = $objecttmp->id;
-				}
-				if ($objecttmp->element == 'expensereport') {
+				} elseif ($objecttmp->element == 'contact') {
+					$thirdpartyid = $objecttmp->id;
+				} elseif ($objecttmp->element == 'expensereport') {
 					$thirdpartyid = $objecttmp->fk_user_author;
 				}
-				$listofselectedthirdparties[$thirdpartyid] = $thirdpartyid;
+				if (empty($thirdpartyid)) {
+					$thirdpartyid = 0;
+				}
+				if ($thirdpartyid) {
+					$listofselectedrecipientobjid[$thirdpartyid] = $thirdpartyid;
+				}
 				$listofselectedref[$thirdpartyid][$toselectid] = $objecttmp->ref;
 			}
 		}
