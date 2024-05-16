@@ -433,5 +433,5 @@ ConfirmEditExtrafieldQuestion = Voulez-vous vraiment modifier cet extrafield ?
 ModifyValueExtrafields = Modifier la valeur d'un extrafield
 OrProductsWithCategories=Ou des produits avec des tags/catégories
 
-import_ref_parent= Ref parent
-import_ref_child= Ref enfant
+ImportRefParent=Ref parent
+ImportRefChild=Ref enfant
