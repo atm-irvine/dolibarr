@@ -1074,7 +1074,8 @@ if (!empty($usemargins) && $user->rights->margins->creer) {
 			{
 				var editor = CKEDITOR.instances['dp_desc'];
 				if (editor) {
-					editor.setData(description);
+					var formattedDescription = description.replace(/\n/g, '<br>');
+					editor.setData(formattedDescription);
 				}
 			}
 					<?php
