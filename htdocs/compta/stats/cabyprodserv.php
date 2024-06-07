@@ -315,9 +315,10 @@ if ($modecompta == 'CREANCES-DETTES') {
 	if ($selected_type >= 0) {
 		$sql .= " AND l.product_type = ".((int) $selected_type);
 	}
-	if ($selected_cat === -2) {	// Without any category
+	if ($selected_cat === -1 ){}    // without any category filter
+	if ($selected_cat === -2 ) {	// Without any category
 		$sql .= " AND cp.fk_product is null";
-	} elseif ($selected_cat) {	// Into a specific category
+	} elseif ($selected_cat > 0) {	// Into a specific category
 		if ($subcat) {
 			$TListOfCats = $categorie->get_full_arbo('product', $selected_cat, 1);
 
