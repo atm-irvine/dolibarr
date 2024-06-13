@@ -309,7 +309,7 @@ if ($socid) {
 }
 $sql .= " GROUP BY s.rowid, s.nom, s.zip, s.town, s.fk_pays";
 $sql .= " ORDER BY s.rowid";
-echo $sql;
+//echo $sql;
 
 dol_syslog("supplier_turnover_by_thirdparty", LOG_DEBUG);
 $result = $db->query($sql);
