@@ -22,6 +22,8 @@
  require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
 
  dol_include_once('/contact/class/contact.class.php');
+ dol_include_once('/clinetworks/class/koesioresource.class.php');
+ dol_include_once('/koesiosite/class/societesite.class.php');
 
 /**
  * API class for contracts
@@ -282,8 +284,12 @@ class Contracts extends DolibarrApi
 
 		$request_data = (object) $request_data;
 
+		if (!isset($request_data->fk_product)) {
+			throw new RestException(400, "Product/service id missing");
+		}
+
 		if (isset($request_data->array_options['options_invoicing_account'])) {
-			if (isset($request_data->array_options['options_invoicing_account']) && $request_data->array_options['options_invoicing_account'] != '') {
+			if ($request_data->array_options['options_invoicing_account'] != '') {
 				$fk_invoicing_account = $request_data->array_options['options_invoicing_account'];
 				$this->checkInvoicingAccount($fk_invoicing_account);
 			} else {
@@ -291,6 +297,20 @@ class Contracts extends DolibarrApi
 			}
 		} else {
 			throw new RestException(400, "options_invoicing_account extrafield missing");
+		}
+
+		if (isset($request_data->array_options['options_koesioresource'])) {
+			if ($request_data->array_options['options_koesioresource'] != '') {
+				$fk_koesioresource = $request_data->array_options['options_koesioresource'];
+				$this->checkKoesioResource($fk_koesioresource);
+			}
+		}
+
+		if (isset($request_data->array_options['options_site'])) {
+			if ($request_data->array_options['options_site'] != '') {
+				$fk_site = $request_data->array_options['options_site'];
+				$this->checkSocieteSite($fk_site);
+			}
 		}
 
 
@@ -414,7 +434,8 @@ class Contracts extends DolibarrApi
 			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
 		}
 
-		$updateRes = $this->contract->active_line(DolibarrApiAccess::$user, $lineid, $datestart, $dateend, $comment);
+		$this->contractLine->fetch($lineid);
+		$updateRes = $this->contractLine->active_line(DolibarrApiAccess::$user, $datestart, $dateend, $comment);
 
 		if ($updateRes > 0) {
 			$result = $this->get($id);
@@ -721,6 +742,40 @@ class Contracts extends DolibarrApi
 			return true;
 		} else {
 			throw new RestException(400, "Invoicing account is not valid");
+		}
+	}
+
+
+	/**
+	 *
+	 * Checks koesioresource
+	 *
+	 * @param int $fk_koesioresource
+	 * @return bool
+	 * @throws RestException
+	 */
+	private function checkKoesioResource(int $fk_koesioresource): bool
+	{
+		$koesioResource = new KoesioResource($this->db);
+		if ($koesioResource->fetch($fk_koesioresource)) {
+			return true;
+		} else {
+			throw new RestException(400, "KoesioResource is not valid");
+		}
+	}
+
+	/**
+	 * @param int $fk_societesite
+	 * @return bool
+	 * @throws RestException
+	 */
+	private function checkSocieteSite(int $fk_societesite): bool
+	{
+		$societeSite = new SocieteSite($this->db);
+		if ($societeSite->fetch($fk_societesite)) {
+			return true;
+		} else {
+			throw new RestException(400, "SocieteSite is not valid");
 		}
 	}
 }
