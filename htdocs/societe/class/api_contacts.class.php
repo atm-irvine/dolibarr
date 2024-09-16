@@ -21,6 +21,7 @@ use Luracast\Restler\RestException;
 //require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 //require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
+dol_include_once('/clinetworks/class/CliNetworksUtils.class.php');
 
 /**
  * API class for contacts
@@ -360,6 +361,12 @@ class Contacts extends DolibarrApi
 			throw new RestException(404, 'Contact not found');
 		}
 
+		$isInDocument = $this->isInDocument('contact', $id);
+
+		if ($isInDocument !== false) {
+			throw new RestException(409, 'Error when deleting contact because it\'s in a document : ' . $isInDocument);
+		}
+
 		if (!DolibarrApi::_checkAccessToResource('contact', $this->contact->id, 'socpeople&societe')) {
 			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
 		}
@@ -578,5 +585,26 @@ class Contacts extends DolibarrApi
 		}
 
 		return $contact;
+	}
+
+	/**
+	 *
+	 * Checks if element is in document (invoice, model invoice or contract)
+	 *
+	 * @param string $element
+	 * @param int $id
+	 * @return string|false
+	 */
+	private function isInDocument(string $element, int $id): string|false
+	{
+
+		$TDocuments = CliNetworksUtils::getIdOfDocumentWhichContainsThisObject($element, $id);
+
+		if (!empty($TDocuments)){
+			return implode(', ', array_keys($TDocuments));
+		}
+
+		return false;
+
 	}
 }

@@ -263,6 +263,12 @@ class Categories extends DolibarrApi
 			throw new RestException(404, 'category not found');
 		}
 
+		$isInDocument = $this->isInDocument('category', $id);
+
+		if ($isInDocument !== false) {
+			throw new RestException(409, 'Error when deleting category because it\'s in a document : ' . $isInDocument);
+		}
+
 		if (!DolibarrApi::_checkAccessToResource('categorie', $this->category->id)) {
 			throw new RestException(401, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
 		}
@@ -790,5 +796,27 @@ class Categories extends DolibarrApi
 		}
 
 		return $cleaned_objects;
+	}
+
+
+	/**
+	 *
+	 * Checks if element is in document (invoice, model invoice or contract)
+	 *
+	 * @param string $element
+	 * @param int $id
+	 * @return string|false
+	 */
+	private function isInDocument(string $element, int $id): string|false
+	{
+
+		$TDocuments = CliNetworksUtils::getIdOfDocumentWhichContainsThisObject($element, $id);
+
+		if (!empty($TDocuments)){
+			return implode(', ', array_keys($TDocuments));
+		}
+
+		return false;
+
 	}
 }
