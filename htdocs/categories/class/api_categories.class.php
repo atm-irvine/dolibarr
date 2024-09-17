@@ -27,6 +27,8 @@ require_once DOL_DOCUMENT_ROOT.'/societe/class/api_contacts.class.php';
 require_once DOL_DOCUMENT_ROOT.'/societe/class/api_thirdparties.class.php';
 require_once DOL_DOCUMENT_ROOT.'/projet/class/api_projects.class.php';
 
+dol_include_once('/clinetworks/class/CliNetworksTools.class.php');
+
 /**
  * API class for categories
  *
@@ -810,7 +812,7 @@ class Categories extends DolibarrApi
 	private function isInDocument(string $element, int $id): string|false
 	{
 
-		$TDocuments = CliNetworksUtils::getIdOfDocumentWhichContainsThisObject($element, $id);
+		$TDocuments = CliNetworksTools::getIdOfDocumentWhichContainsThisObject($element, $id);
 
 		if (!empty($TDocuments)){
 			return implode(', ', array_keys($TDocuments));

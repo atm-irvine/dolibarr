@@ -21,7 +21,7 @@ use Luracast\Restler\RestException;
 //require_once DOL_DOCUMENT_ROOT.'/contact/class/contact.class.php';
 //require_once DOL_DOCUMENT_ROOT.'/categories/class/categorie.class.php';
 
-dol_include_once('/clinetworks/class/CliNetworksUtils.class.php');
+dol_include_once('/clinetworks/class/CliNetworksTools.class.php');
 
 /**
  * API class for contacts
@@ -598,7 +598,7 @@ class Contacts extends DolibarrApi
 	private function isInDocument(string $element, int $id): string|false
 	{
 
-		$TDocuments = CliNetworksUtils::getIdOfDocumentWhichContainsThisObject($element, $id);
+		$TDocuments = CliNetworksTools::getIdOfDocumentWhichContainsThisObject($element, $id);
 
 		if (!empty($TDocuments)){
 			return implode(', ', array_keys($TDocuments));
