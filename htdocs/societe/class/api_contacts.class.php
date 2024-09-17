@@ -361,10 +361,10 @@ class Contacts extends DolibarrApi
 			throw new RestException(404, 'Contact not found');
 		}
 
-		$isInDocument = $this->isInDocument('contact', $id);
+		$documents = implode(', ', array_keys(CliNetworksTools::getIdOfDocumentWhichContainsThisObject('contact', $id)));
 
-		if ($isInDocument !== false) {
-			throw new RestException(409, 'Error when deleting contact because it\'s in a document : ' . $isInDocument);
+		if (!empty($documents)) {
+			throw new RestException(409, 'Error when deleting Contact because it\'s in a document : ' . $documents);
 		}
 
 		if (!DolibarrApi::_checkAccessToResource('contact', $this->contact->id, 'socpeople&societe')) {
@@ -585,26 +585,5 @@ class Contacts extends DolibarrApi
 		}
 
 		return $contact;
-	}
-
-	/**
-	 *
-	 * Checks if element is in document (invoice, model invoice or contract)
-	 *
-	 * @param string $element
-	 * @param int $id
-	 * @return string|false
-	 */
-	private function isInDocument(string $element, int $id): string|false
-	{
-
-		$TDocuments = CliNetworksTools::getIdOfDocumentWhichContainsThisObject($element, $id);
-
-		if (!empty($TDocuments)){
-			return implode(', ', array_keys($TDocuments));
-		}
-
-		return false;
-
 	}
 }
