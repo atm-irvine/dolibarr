@@ -20,6 +20,7 @@
  use Luracast\Restler\RestException;
 
  require_once DOL_DOCUMENT_ROOT.'/contrat/class/contrat.class.php';
+ require_once DOL_DOCUMENT_ROOT.'/societe/class/societe.class.php';
 
  dol_include_once('/contact/class/contact.class.php');
  dol_include_once('/clinetworks/class/koesioresource.class.php');
@@ -209,16 +210,17 @@ class Contracts extends DolibarrApi
 		// Check mandatory fields
 		$result = $this->_validate($request_data);
 
+		if (isset($request_data['array_options']['options_reseller'])) {
+			if ($request_data['array_options']['options_reseller'] != '') {
+				$fk_reseller = $request_data['array_options']['options_reseller'];
+				$this->checkReseller($fk_reseller);
+			}
+		}
+
 		foreach ($request_data as $field => $value) {
 			$this->contract->$field = $value;
 		}
-		/*if (isset($request_data["lines"])) {
-		  $lines = array();
-		  foreach ($request_data["lines"] as $line) {
-			array_push($lines, (object) $line);
-		  }
-		  $this->contract->lines = $lines;
-		}*/
+
 		if ($this->contract->create(DolibarrApiAccess::$user) < 0) {
 			throw new RestException(500, "Error creating contract", array_merge(array($this->contract->error), $this->contract->errors));
 		}
@@ -776,6 +778,21 @@ class Contracts extends DolibarrApi
 			return true;
 		} else {
 			throw new RestException(400, "SocieteSite is not valid");
+		}
+	}
+
+	/**
+	 * @param int $fk_reseller
+	 * @return bool
+	 * @throws RestException
+	 */
+	private function checkReseller(int $fk_reseller): bool
+	{
+		$societe = new Societe($this->db);
+		if ($societe->fetch($fk_reseller)) {
+			return true;
+		} else {
+			throw new RestException(400, "Thirdparty is not valid");
 		}
 	}
 }
