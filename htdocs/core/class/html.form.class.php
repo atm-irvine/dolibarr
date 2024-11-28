@@ -85,6 +85,7 @@ class Form
 	public $cache_types_fees = array();
 	public $cache_vatrates = array();
 	public $cache_invoice_subtype = array();
+	public $cache_billing_term = array();
 
 
 	/**
@@ -4296,6 +4297,20 @@ class Form
 		}
 	}
 
+	public function load_cache_billing_term()
+	{
+		$factureRec = new FactureRec($this->db);
+
+		$this->cache_billing_term = $factureRec->fields['billing_term']['arrayofkeyval'];
+
+		if (empty($this->cache_billing_term)) {
+			return -1;
+		}
+
+		return 1;
+
+	}
+
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 
 	/**
@@ -4648,6 +4663,35 @@ class Form
 					});
 				</script>';
 		}
+
+		return $out;
+	}
+
+	public function getSelectBillingTerm($selected = 0, $htmlname = 'billing_term_id', $addempty = 0)
+	{
+		$out = '';
+
+		$this->load_cache_billing_term();
+
+		$out .= '<select id="' . $htmlname . '" class="flat selectbillingterm" name="' . $htmlname . '">';
+		if ($addempty) {
+			$out .= '<option value="-1">&nbsp;</option>';
+		}
+
+
+		foreach ($this->cache_billing_term as $billing_term_id => $billing_term_name) {
+			if ($selected == $billing_term_id) {
+				$out .= '<option value="' . $billing_term_id . '" selected>';
+			} else {
+				$out .= '<option value="' . $billing_term_id . '">';
+			}
+
+			$out .= $billing_term_name;
+			$out .= '</option>';
+		}
+		$out .= '</select>';
+
+		$out .= ajax_combobox($htmlname);
 
 		return $out;
 	}
@@ -6126,6 +6170,46 @@ class Form
 	}
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
+
+	/**
+	 * @param $page
+	 * @param $selected
+	 * @param $htmlname
+	 * @param $addempty
+	 * @return string
+	 */
+	public function form_billing_term($page, $selected = 0, $htmlname = 'billing_term_id', $addempty = 0, $nooutput = 0): string
+	{
+		global $langs;
+
+		$out = '';
+
+		if ($htmlname != 'none') {
+			$out .= '<form method="POST" action="' . $page . '">';
+			$out .= '<input type="hidden" name="action" value="setbillingterm">';
+			$out .= '<input type="hidden" name="token" value="' . newToken() . '">';
+			$out .= $this->getSelectBillingTerm($selected, $htmlname, $addempty);
+			$out .= '<input type="submit" class="button valignmiddle smallpaddingimp" value="' . $langs->trans("Modify") . '">';
+			$out .= '</form>';
+		} else {
+			if (isset($selected)) {
+				$this->load_cache_billing_term();
+				if (isset($this->cache_billing_term[$selected])) {
+					$label = $this->cache_billing_term[$selected];
+					$out .= $langs->trans($label);
+				}
+			} else {
+				$out .= '&nbsp;';
+			}
+		}
+
+		if (empty($nooutput)) {
+			print $out;
+			return '';
+		}
+
+		return $out;
+	}
 
 	/**
 	 *  Show a form to select a delivery delay

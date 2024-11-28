@@ -157,6 +157,11 @@ class FactureRec extends CommonInvoice
 	public $unit_frequency;
 
 	/**
+	 * @var int<0, 1>
+	 */
+	public $billing_term = 0; // 0 = Prepaid ; 1 = Postpaid
+
+	/**
 	 * @var int
 	 */
 	public $rang;
@@ -262,6 +267,7 @@ class FactureRec extends CommonInvoice
 		'nb_gen_max' => array('type' => 'integer', 'label' => 'Nb gen max', 'enabled' => 1, 'visible' => -1, 'position' => 145),
 		'frequency' => array('type' => 'integer', 'label' => 'Frequency', 'enabled' => 1, 'visible' => -1, 'position' => 150),
 		'unit_frequency' => array('type' => 'varchar(2)', 'label' => 'UnitFrequency', 'enabled' => 1, 'visible' => -1, 'position' => 152),
+		'billing_term' => array('type' => 'integer', 'label' => 'BillingTerm', 'enabled' => 1, 'visible' => 1, 'position' => 153, 'arrayofkeyval' => array(0 => "Prepaid", 1 => "Postpaid"), 'default' => '0'),
 		'usenewprice' => array('type' => 'integer', 'label' => 'UseNewPrice', 'enabled' => 1, 'visible' => 0, 'position' => 155),
 		'revenuestamp' => array('type' => 'double(24,8)', 'label' => 'RevenueStamp', 'enabled' => 1, 'visible' => -1, 'position' => 160, 'isameasure' => 1),
 		'auto_validate' => array('type' => 'integer', 'label' => 'Auto validate', 'enabled' => 1, 'visible' => -1, 'position' => 165),
@@ -358,6 +364,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", usenewprice";
 			$sql .= ", frequency";
 			$sql .= ", unit_frequency";
+			$sql .= ", billing_term";
 			$sql .= ", date_when";
 			$sql .= ", date_last_gen";
 			$sql .= ", nb_gen_done";
@@ -388,6 +395,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", ".((int) $this->usenewprice);
 			$sql .= ", ".((int) $this->frequency);
 			$sql .= ", '".$this->db->escape($this->unit_frequency)."'";
+			$sql .= ", '".((int) $this->billing_term);
 			$sql .= ", ".(!empty($this->date_when) ? "'".$this->db->idate($this->date_when)."'" : 'NULL');
 			$sql .= ", ".(!empty($this->date_last_gen) ? "'".$this->db->idate($this->date_last_gen)."'" : 'NULL');
 			$sql .= ", ".((int) $this->nb_gen_done);
@@ -626,7 +634,7 @@ class FactureRec extends CommonInvoice
 		$sql .= ', f.modelpdf as model_pdf';
 		$sql .= ', f.fk_mode_reglement, f.fk_cond_reglement, f.fk_projet as fk_project';
 		$sql .= ', f.fk_account, f.fk_societe_rib';
-		$sql .= ', f.frequency, f.unit_frequency, f.date_when, f.date_last_gen, f.nb_gen_done, f.nb_gen_max, f.usenewprice, f.auto_validate';
+		$sql .= ', f.frequency, f.unit_frequency, f.billing_term, f.date_when, f.date_last_gen, f.nb_gen_done, f.nb_gen_max, f.usenewprice, f.auto_validate';
 		$sql .= ', f.generate_pdf';
 		$sql .= ", f.fk_multicurrency, f.multicurrency_code, f.multicurrency_tx, f.multicurrency_total_ht, f.multicurrency_total_tva, f.multicurrency_total_ttc";
 		$sql .= ', p.code as mode_reglement_code, p.libelle as mode_reglement_libelle';
@@ -685,6 +693,7 @@ class FactureRec extends CommonInvoice
 				//$this->special_code = $obj->special_code;
 				$this->frequency			  = $obj->frequency;
 				$this->unit_frequency = $obj->unit_frequency;
+				$this->billing_term           = $obj->billing_term;
 				$this->date_when			  = $this->db->jdate($obj->date_when);
 				$this->date_last_gen = $this->db->jdate($obj->date_last_gen);
 				$this->nb_gen_done			  = $obj->nb_gen_done;

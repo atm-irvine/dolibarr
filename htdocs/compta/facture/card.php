@@ -1809,6 +1809,7 @@ if (empty($reshook)) {
 										if (isset($lines[$i]->date_debut_reel)) {
 											$date_start = $lines[$i]->date_debut_reel;
 										}
+
 										if (isset($lines[$i]->date_start)) {
 											$date_start = $lines[$i]->date_start;
 										}

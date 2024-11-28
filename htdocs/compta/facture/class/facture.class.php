@@ -567,12 +567,25 @@ class Facture extends CommonInvoice
 			}
 
 			// Define some dates
+
 			$originaldatewhen = $_facrec->date_when;
 			$nextdatewhen = null;
 			$previousdaynextdatewhen = null;
+
 			if ($originaldatewhen) {
-				$nextdatewhen = dol_time_plus_duree($originaldatewhen, $_facrec->frequency, $_facrec->unit_frequency);
-				$previousdaynextdatewhen = dol_time_plus_duree($nextdatewhen, -1, 'd');
+				if ($_facrec->billing_term == 0) {
+					$nextdatewhen = dol_time_plus_duree($originaldatewhen, $_facrec->frequency, $_facrec->unit_frequency);
+				}
+
+				if ($_facrec->billing_term == 1) {
+					$previousdaynextdatewhen = dol_time_plus_duree($originaldatewhen, -1, 'd');
+				} else {
+					$previousdaynextdatewhen = dol_time_plus_duree($nextdatewhen, -1, 'd');
+				}
+
+				$originaldatewhen = $_facrec->billing_term == 1
+					? dol_time_plus_duree($originaldatewhen, -$_facrec->frequency, $_facrec->unit_frequency)
+					: $originaldatewhen;
 			}
 
 			if (!empty($_facrec->frequency)) {  // Invoice are created on same thirdparty than template when there is a recurrence, but not necessarily when there is no recurrence.

@@ -429,6 +429,10 @@ if (empty($reshook)) {
 	} elseif ($action == 'setmulticurrencyrate' && $usercancreate) {
 		// Multicurrency rate
 		$result = $object->setMulticurrencyRate(price2num(GETPOST('multicurrency_tx')), GETPOSTINT('calculation_mode'));
+	} elseif ($action == 'setbillingterm' && $usercancreate) {
+		$object->context['actionmsg'] = $langs->trans("FieldXModified", $langs->transnoentitiesnoconv("BillingTerm"));
+		$billingTermId = (GETPOSTINT('billing_term_id') != "-1") ? GETPOSTINT('billing_term_id') : 0;
+		$object->setValueFrom('billing_term', $billingTermId);
 	}
 
 	// Delete line
@@ -1492,6 +1496,24 @@ if ($action == 'create') {
 		}
 		print "</td>";
 		print '</tr>';
+
+
+		// Billing Term
+		print '<tr><td>';
+		print '<table class="nobordernopadding centpercent"><tr><td>';
+		print $langs->trans('BillingTerm');
+		print '</td>';
+		if ($action != 'editbillingterm' && $user->hasRight('facture', 'creer')) {
+			print '<td class="right"><a class="editfielda" href="'.$_SERVER["PHP_SELF"].'?action=editbillingterm&token='.newToken().'&facid='.$object->id.'">'.img_edit($langs->trans('SetBillingTerm'), 1).'</a></td>';
+		}
+		print '</tr></table>';
+		print '</td><td>';
+		if ($action == 'editbillingterm') {
+			$form->form_billing_term($_SERVER['PHP_SELF'].'?facid='.$object->id, $object->billing_term, 'billing_term_id');
+		} else {
+			$form->form_billing_term($_SERVER['PHP_SELF'].'?facid='.$object->id, $object->billing_term, 'none');
+		}
+		print '</td></tr>';
 
 		// Extrafields
 		include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_view.tpl.php';
