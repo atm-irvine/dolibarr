@@ -395,7 +395,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", ".((int) $this->usenewprice);
 			$sql .= ", ".((int) $this->frequency);
 			$sql .= ", '".$this->db->escape($this->unit_frequency)."'";
-			$sql .= ", '".((int) $this->billing_term);
+			$sql .= ", ".((int) $this->billing_term);
 			$sql .= ", ".(!empty($this->date_when) ? "'".$this->db->idate($this->date_when)."'" : 'NULL');
 			$sql .= ", ".(!empty($this->date_last_gen) ? "'".$this->db->idate($this->date_last_gen)."'" : 'NULL');
 			$sql .= ", ".((int) $this->nb_gen_done);

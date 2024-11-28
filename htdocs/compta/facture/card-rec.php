@@ -249,6 +249,7 @@ if (empty($reshook)) {
 			$object->mode_reglement_id     = GETPOSTINT('mode_reglement_id');
 			$object->cond_reglement_id     = GETPOSTINT('cond_reglement_id');
 			$object->fk_societe_rib 	   = GETPOSTINT('accountcustomerid');
+			$object->billing_term          = GETPOSTINT('billing_term_id');
 
 			$object->frequency             = $frequency;
 			$object->unit_frequency        = GETPOST('unit_frequency', 'alpha');
@@ -1147,6 +1148,12 @@ if ($action == 'create') {
 			$form->formSelectAccount($_SERVER['PHP_SELF'].'?id='.$object->id, $object->fk_account, 'none');
 			print "</td></tr>";
 		}
+
+		// Billing term
+		print "<tr><td>".$langs->trans("BillingTerm")."</td><td>";
+		print $form->getSelectBillingTerm(GETPOSTISSET('billing_term_id') ? GETPOSTINT('billing_term_id') : $object->billing_term);
+		//$form->form_conditions_reglement($_SERVER['PHP_SELF'].'?id='.$object->id, $object->cond_reglement_id, 'cond_reglement_id');
+		print "</td></tr>";
 
 		//extrafields
 		$draft = new Facture($db);
