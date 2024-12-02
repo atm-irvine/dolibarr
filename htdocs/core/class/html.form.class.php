@@ -85,7 +85,7 @@ class Form
 	public $cache_types_fees = array();
 	public $cache_vatrates = array();
 	public $cache_invoice_subtype = array();
-	public $cache_billing_term = array();
+	public $cache_rule_for_lines_dates = array();
 
 
 	/**
@@ -4297,13 +4297,13 @@ class Form
 		}
 	}
 
-	public function load_cache_billing_term()
+	public function load_cache_rule_for_lines_dates()
 	{
 		$factureRec = new FactureRec($this->db);
 
-		$this->cache_billing_term = $factureRec->fields['billing_term']['arrayofkeyval'];
+		$this->cache_rule_for_lines_dates = $factureRec->fields['rule_for_lines_dates']['arrayofkeyval'];
 
-		if (empty($this->cache_billing_term)) {
+		if (empty($this->cache_rule_for_lines_dates)) {
 			return -1;
 		}
 
@@ -4667,11 +4667,11 @@ class Form
 		return $out;
 	}
 
-	public function getSelectBillingTerm($selected = 0, $htmlname = 'billing_term_id', $addempty = 0)
+	public function getSelectRuleForLinesDates($selected = '', $htmlname = 'rule_for_lines_dates', $addempty = 0)
 	{
 		$out = '';
 
-		$this->load_cache_billing_term();
+		$this->load_cache_rule_for_lines_dates();
 
 		$out .= '<select id="' . $htmlname . '" class="flat selectbillingterm" name="' . $htmlname . '">';
 		if ($addempty) {
@@ -4679,14 +4679,14 @@ class Form
 		}
 
 
-		foreach ($this->cache_billing_term as $billing_term_id => $billing_term_name) {
-			if ($selected == $billing_term_id) {
-				$out .= '<option value="' . $billing_term_id . '" selected>';
+		foreach ($this->cache_rule_for_lines_dates as $rule_for_lines_dates_key => $rule_for_lines_dates_name) {
+			if ($selected == $rule_for_lines_dates_key) {
+				$out .= '<option value="' . $rule_for_lines_dates_key . '" selected>';
 			} else {
-				$out .= '<option value="' . $billing_term_id . '">';
+				$out .= '<option value="' . $rule_for_lines_dates_key . '">';
 			}
 
-			$out .= $billing_term_name;
+			$out .= $rule_for_lines_dates_name;
 			$out .= '</option>';
 		}
 		$out .= '</select>';
@@ -6178,7 +6178,7 @@ class Form
 	 * @param $addempty
 	 * @return string
 	 */
-	public function form_billing_term($page, $selected = 0, $htmlname = 'billing_term_id', $addempty = 0, $nooutput = 0): string
+	public function form_rule_for_lines_dates($page, $selected = '', $htmlname = 'rule_for_lines_dates', $addempty = 0, $nooutput = 0): string
 	{
 		global $langs;
 
@@ -6186,16 +6186,16 @@ class Form
 
 		if ($htmlname != 'none') {
 			$out .= '<form method="POST" action="' . $page . '">';
-			$out .= '<input type="hidden" name="action" value="setbillingterm">';
+			$out .= '<input type="hidden" name="action" value="setruleforlinesdates">';
 			$out .= '<input type="hidden" name="token" value="' . newToken() . '">';
-			$out .= $this->getSelectBillingTerm($selected, $htmlname, $addempty);
+			$out .= $this->getSelectRuleForLinesDates($selected, $htmlname, $addempty);
 			$out .= '<input type="submit" class="button valignmiddle smallpaddingimp" value="' . $langs->trans("Modify") . '">';
 			$out .= '</form>';
 		} else {
 			if (isset($selected)) {
-				$this->load_cache_billing_term();
-				if (isset($this->cache_billing_term[$selected])) {
-					$label = $this->cache_billing_term[$selected];
+				$this->load_cache_rule_for_lines_dates();
+				if (isset($this->cache_rule_for_lines_dates[$selected])) {
+					$label = $this->cache_rule_for_lines_dates[$selected];
 					$out .= $langs->trans($label);
 				}
 			} else {

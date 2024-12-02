@@ -429,10 +429,10 @@ if (empty($reshook)) {
 	} elseif ($action == 'setmulticurrencyrate' && $usercancreate) {
 		// Multicurrency rate
 		$result = $object->setMulticurrencyRate(price2num(GETPOST('multicurrency_tx')), GETPOSTINT('calculation_mode'));
-	} elseif ($action == 'setbillingterm' && $usercancreate) {
-		$object->context['actionmsg'] = $langs->trans("FieldXModified", $langs->transnoentitiesnoconv("BillingTerm"));
-		$billingTermId = (GETPOSTINT('billing_term_id') != "-1") ? GETPOSTINT('billing_term_id') : 0;
-		$object->setValueFrom('billing_term', $billingTermId);
+	} elseif ($action == 'setruleforlinesdates' && $usercancreate) {
+		$object->context['actionmsg'] = $langs->trans("FieldXModified", $langs->transnoentitiesnoconv("RuleForLinesDates"));
+		$ruleForLinesDates = GETPOSTISSET('rule_for_lines_dates') ? GETPOST('rule_for_lines_dates', 'alpha') : 'prepaid';
+		$object->setValueFrom('rule_for_lines_dates', $ruleForLinesDates);
 	}
 
 	// Delete line
@@ -1501,17 +1501,17 @@ if ($action == 'create') {
 		// Billing Term
 		print '<tr><td>';
 		print '<table class="nobordernopadding centpercent"><tr><td>';
-		print $langs->trans('BillingTerm');
+		print $langs->trans('RuleForLinesDates');
 		print '</td>';
-		if ($action != 'editbillingterm' && $user->hasRight('facture', 'creer')) {
-			print '<td class="right"><a class="editfielda" href="'.$_SERVER["PHP_SELF"].'?action=editbillingterm&token='.newToken().'&facid='.$object->id.'">'.img_edit($langs->trans('SetBillingTerm'), 1).'</a></td>';
+		if ($action != 'editruleforlinesdates' && $user->hasRight('facture', 'creer')) {
+			print '<td class="right"><a class="editfielda" href="'.$_SERVER["PHP_SELF"].'?action=editruleforlinesdates&token='.newToken().'&facid='.$object->id.'">'.img_edit($langs->trans('SetRuleForLinesDates'), 1).'</a></td>';
 		}
 		print '</tr></table>';
 		print '</td><td>';
-		if ($action == 'editbillingterm') {
-			$form->form_billing_term($_SERVER['PHP_SELF'].'?facid='.$object->id, $object->billing_term, 'billing_term_id');
+		if ($action == 'editruleforlinesdates') {
+			$form->form_rule_for_lines_dates($_SERVER['PHP_SELF'].'?facid='.$object->id, $object->rule_for_lines_dates, 'rule_for_lines_dates');
 		} else {
-			$form->form_billing_term($_SERVER['PHP_SELF'].'?facid='.$object->id, $object->billing_term, 'none');
+			$form->form_rule_for_lines_dates($_SERVER['PHP_SELF'].'?facid='.$object->id, $object->rule_for_lines_dates, 'none');
 		}
 		print '</td></tr>';
 

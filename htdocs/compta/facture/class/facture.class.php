@@ -573,17 +573,17 @@ class Facture extends CommonInvoice
 			$previousdaynextdatewhen = null;
 
 			if ($originaldatewhen) {
-				if ($_facrec->billing_term == 0) {
+				if ($_facrec->rule_for_lines_dates == 'prepaid') {
 					$nextdatewhen = dol_time_plus_duree($originaldatewhen, $_facrec->frequency, $_facrec->unit_frequency);
 				}
 
-				if ($_facrec->billing_term == 1) {
+				if ($_facrec->rule_for_lines_dates == 'postpaid') {
 					$previousdaynextdatewhen = dol_time_plus_duree($originaldatewhen, -1, 'd');
 				} else {
 					$previousdaynextdatewhen = dol_time_plus_duree($nextdatewhen, -1, 'd');
 				}
 
-				$originaldatewhen = $_facrec->billing_term == 1
+				$originaldatewhen = $_facrec->rule_for_lines_dates == 'postpaid'
 					? dol_time_plus_duree($originaldatewhen, -$_facrec->frequency, $_facrec->unit_frequency)
 					: $originaldatewhen;
 			}

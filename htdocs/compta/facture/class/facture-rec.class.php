@@ -157,9 +157,9 @@ class FactureRec extends CommonInvoice
 	public $unit_frequency;
 
 	/**
-	 * @var int<0, 1>
+	 * @var string
 	 */
-	public $billing_term = 0; // 0 = Prepaid ; 1 = Postpaid
+	public $rule_for_lines_dates;
 
 	/**
 	 * @var int
@@ -264,10 +264,10 @@ class FactureRec extends CommonInvoice
 		'date_when' => array('type' => 'datetime', 'label' => 'Date when', 'enabled' => 1, 'visible' => -1, 'position' => 130),
 		'date_last_gen' => array('type' => 'datetime', 'label' => 'Date last gen', 'enabled' => 1, 'visible' => -1, 'position' => 135),
 		'nb_gen_done' => array('type' => 'integer', 'label' => 'Nb gen done', 'enabled' => 1, 'visible' => -1, 'position' => 140),
-		'nb_gen_max' => array('type' => 'integer', 'label' => 'Nb gen max', 'enabled' => 1, 'visible' => -1, 'position' => 145),
+		'nb_gen_max' => array('type' => 'integer', 'label' => 'Nb gen max', 'enabled' => 1, 'visible' => -1, 'position' => 145, ),
 		'frequency' => array('type' => 'integer', 'label' => 'Frequency', 'enabled' => 1, 'visible' => -1, 'position' => 150),
 		'unit_frequency' => array('type' => 'varchar(2)', 'label' => 'UnitFrequency', 'enabled' => 1, 'visible' => -1, 'position' => 152),
-		'billing_term' => array('type' => 'integer', 'label' => 'BillingTerm', 'enabled' => 1, 'visible' => 1, 'position' => 153, 'arrayofkeyval' => array(0 => "Prepaid", 1 => "Postpaid"), 'default' => '0'),
+		'rule_for_lines_dates' => array('type' => 'varchar(255)', 'label' => 'RuleForLinesDates', 'enabled' => 1, 'visible' => 1, 'position' => 153, 'arrayofkeyval' => array('prepaid' => "Prepaid", 'postpaid' => "Postpaid"), 'default' => 'prepaid'),
 		'usenewprice' => array('type' => 'integer', 'label' => 'UseNewPrice', 'enabled' => 1, 'visible' => 0, 'position' => 155),
 		'revenuestamp' => array('type' => 'double(24,8)', 'label' => 'RevenueStamp', 'enabled' => 1, 'visible' => -1, 'position' => 160, 'isameasure' => 1),
 		'auto_validate' => array('type' => 'integer', 'label' => 'Auto validate', 'enabled' => 1, 'visible' => -1, 'position' => 165),
@@ -364,7 +364,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", usenewprice";
 			$sql .= ", frequency";
 			$sql .= ", unit_frequency";
-			$sql .= ", billing_term";
+			$sql .= ", rule_for_lines_dates";
 			$sql .= ", date_when";
 			$sql .= ", date_last_gen";
 			$sql .= ", nb_gen_done";
@@ -395,7 +395,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", ".((int) $this->usenewprice);
 			$sql .= ", ".((int) $this->frequency);
 			$sql .= ", '".$this->db->escape($this->unit_frequency)."'";
-			$sql .= ", '".((int) $this->billing_term);
+			$sql .= ", '".($this->rule_for_lines_dates);
 			$sql .= ", ".(!empty($this->date_when) ? "'".$this->db->idate($this->date_when)."'" : 'NULL');
 			$sql .= ", ".(!empty($this->date_last_gen) ? "'".$this->db->idate($this->date_last_gen)."'" : 'NULL');
 			$sql .= ", ".((int) $this->nb_gen_done);
@@ -634,7 +634,7 @@ class FactureRec extends CommonInvoice
 		$sql .= ', f.modelpdf as model_pdf';
 		$sql .= ', f.fk_mode_reglement, f.fk_cond_reglement, f.fk_projet as fk_project';
 		$sql .= ', f.fk_account, f.fk_societe_rib';
-		$sql .= ', f.frequency, f.unit_frequency, f.billing_term, f.date_when, f.date_last_gen, f.nb_gen_done, f.nb_gen_max, f.usenewprice, f.auto_validate';
+		$sql .= ', f.frequency, f.unit_frequency, f.rule_for_lines_dates, f.date_when, f.date_last_gen, f.nb_gen_done, f.nb_gen_max, f.usenewprice, f.auto_validate';
 		$sql .= ', f.generate_pdf';
 		$sql .= ", f.fk_multicurrency, f.multicurrency_code, f.multicurrency_tx, f.multicurrency_total_ht, f.multicurrency_total_tva, f.multicurrency_total_ttc";
 		$sql .= ', p.code as mode_reglement_code, p.libelle as mode_reglement_libelle';
@@ -693,7 +693,7 @@ class FactureRec extends CommonInvoice
 				//$this->special_code = $obj->special_code;
 				$this->frequency			  = $obj->frequency;
 				$this->unit_frequency = $obj->unit_frequency;
-				$this->billing_term           = $obj->billing_term;
+				$this->rule_for_lines_dates   = $obj->rule_for_lines_dates;
 				$this->date_when			  = $this->db->jdate($obj->date_when);
 				$this->date_last_gen = $this->db->jdate($obj->date_last_gen);
 				$this->nb_gen_done			  = $obj->nb_gen_done;
