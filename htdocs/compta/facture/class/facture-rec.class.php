@@ -157,9 +157,9 @@ class FactureRec extends CommonInvoice
 	public $unit_frequency;
 
 	/**
-	 * @var int<0, 1>
+	 * @var string
 	 */
-	public $billing_term = 0; // 0 = Prepaid ; 1 = Postpaid
+	public $rule_for_lines_dates;
 
 	/**
 	 * @var int
@@ -267,7 +267,7 @@ class FactureRec extends CommonInvoice
 		'nb_gen_max' => array('type' => 'integer', 'label' => 'Nb gen max', 'enabled' => 1, 'visible' => -1, 'position' => 145),
 		'frequency' => array('type' => 'integer', 'label' => 'Frequency', 'enabled' => 1, 'visible' => -1, 'position' => 150),
 		'unit_frequency' => array('type' => 'varchar(2)', 'label' => 'UnitFrequency', 'enabled' => 1, 'visible' => -1, 'position' => 152),
-		'billing_term' => array('type' => 'integer', 'label' => 'BillingTerm', 'enabled' => 1, 'visible' => 1, 'position' => 153, 'arrayofkeyval' => array(0 => "Prepaid", 1 => "Postpaid"), 'default' => '0'),
+		'rule_for_lines_dates' => array('type' => 'varchar(255)', 'label' => 'RuleForLinesDates', 'enabled' => 1, 'visible' => 1, 'position' => 153, 'default' => 'prepaid'),
 		'usenewprice' => array('type' => 'integer', 'label' => 'UseNewPrice', 'enabled' => 1, 'visible' => 0, 'position' => 155),
 		'revenuestamp' => array('type' => 'double(24,8)', 'label' => 'RevenueStamp', 'enabled' => 1, 'visible' => -1, 'position' => 160, 'isameasure' => 1),
 		'auto_validate' => array('type' => 'integer', 'label' => 'Auto validate', 'enabled' => 1, 'visible' => -1, 'position' => 165),
