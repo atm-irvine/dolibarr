@@ -4297,6 +4297,11 @@ class Form
 		}
 	}
 
+	/**
+	 * Loads into cache rule for lines dates
+	 *
+	 * @return int
+	 */
 	public function load_cache_rule_for_lines_dates()
 	{
 		$factureRec = new FactureRec($this->db);
@@ -6172,10 +6177,13 @@ class Form
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 
 	/**
+	 * Form select for rule for lines dates
+	 *
 	 * @param $page
-	 * @param $selected
-	 * @param $htmlname
-	 * @param $addempty
+	 * @param string $selected
+	 * @param string $htmlname
+	 * @param int $addempty
+	 * @param int $nooutput
 	 * @return string
 	 */
 	public function form_rule_for_lines_dates($page, $selected = '', $htmlname = 'rule_for_lines_dates', $addempty = 0, $nooutput = 0): string
