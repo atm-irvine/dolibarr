@@ -4297,10 +4297,12 @@ class Form
 		}
 	}
 
+	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
+
 	/**
 	 * Loads into cache rule for lines dates
 	 *
-	 * @return int
+	 * @return int 1=OK ; -1=Empty
 	 */
 	public function load_cache_rule_for_lines_dates()
 	{
@@ -4313,7 +4315,6 @@ class Form
 		}
 
 		return 1;
-
 	}
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
@@ -4672,6 +4673,14 @@ class Form
 		return $out;
 	}
 
+	/**
+	 * Returns select with rule for lines dates
+	 *
+	 * @param $selected Selected value
+	 * @param $htmlname HTML element name
+	 * @param $addempty Add empty option ?
+	 * @return string HTML string with all datas
+	 */
 	public function getSelectRuleForLinesDates($selected = '', $htmlname = 'rule_for_lines_dates', $addempty = 0)
 	{
 		$out = '';
@@ -6179,12 +6188,12 @@ class Form
 	/**
 	 * Form select for rule for lines dates
 	 *
-	 * @param $page
-	 * @param string $selected
-	 * @param string $htmlname
-	 * @param int $addempty
-	 * @param int $nooutput
-	 * @return string
+	 * @param $page Page
+	 * @param string $selected Id condition pre-selectionne
+	 * @param string $htmlname Name of select html field
+	 * @param int $addempty Add empty entry
+	 * @param int $nooutput No print is done. String is returned.
+	 * @return string HTML output or ''
 	 */
 	public function form_rule_for_lines_dates($page, $selected = '', $htmlname = 'rule_for_lines_dates', $addempty = 0, $nooutput = 0): string
 	{
