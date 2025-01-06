@@ -4683,6 +4683,8 @@ class Form
 	 */
 	public function getSelectRuleForLinesDates($selected = '', $htmlname = 'rule_for_lines_dates', $addempty = 0)
 	{
+		global $langs;
+
 		$out = '';
 
 		$this->load_cache_rule_for_lines_dates();
@@ -4700,7 +4702,7 @@ class Form
 				$out .= '<option value="' . $rule_for_lines_dates_key . '">';
 			}
 
-			$out .= $rule_for_lines_dates_name;
+			$out .= $langs->trans($rule_for_lines_dates_name);
 			$out .= '</option>';
 		}
 		$out .= '</select>';
