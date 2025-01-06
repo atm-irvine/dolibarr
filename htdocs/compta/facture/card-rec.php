@@ -249,6 +249,7 @@ if (empty($reshook)) {
 			$object->mode_reglement_id     = GETPOSTINT('mode_reglement_id');
 			$object->cond_reglement_id     = GETPOSTINT('cond_reglement_id');
 			$object->fk_societe_rib 	   = GETPOSTINT('accountcustomerid');
+			$object->rule_for_lines_dates  = GETPOST('rule_for_lines_dates', 'alpha');
 
 			$object->frequency             = $frequency;
 			$object->unit_frequency        = GETPOST('unit_frequency', 'alpha');
@@ -1147,6 +1148,11 @@ if ($action == 'create') {
 			$form->formSelectAccount($_SERVER['PHP_SELF'].'?id='.$object->id, $object->fk_account, 'none');
 			print "</td></tr>";
 		}
+
+		// Rule for lines dates
+		print "<tr><td>".$langs->trans("RuleForLinesDates")."</td><td>";
+		print $form->getSelectRuleForLinesDates(GETPOSTISSET('rule_for_lines_dates') ? GETPOST('rule_for_lines_dates', 'alpha') : $object->rule_for_lines_dates);
+		print "</td></tr>";
 
 		//extrafields
 		$draft = new Facture($db);

@@ -364,7 +364,6 @@ class FactureRec extends CommonInvoice
 			$sql .= ", usenewprice";
 			$sql .= ", frequency";
 			$sql .= ", unit_frequency";
-			$sql .= ", rule_for_lines_dates";
 			$sql .= ", date_when";
 			$sql .= ", date_last_gen";
 			$sql .= ", nb_gen_done";
@@ -376,6 +375,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", multicurrency_tx";
 			$sql .= ", suspended";
 			$sql .= ", fk_societe_rib";
+			$sql .= ", rule_for_lines_dates";
 			$sql .= ") VALUES (";
 			$sql .= "'".$this->db->escape($this->titre ? $this->titre : $this->title)."'";
 			$sql .= ", ".((int) $this->socid);
@@ -395,7 +395,6 @@ class FactureRec extends CommonInvoice
 			$sql .= ", ".((int) $this->usenewprice);
 			$sql .= ", ".((int) $this->frequency);
 			$sql .= ", '".$this->db->escape($this->unit_frequency)."'";
-			$sql .= ", '".($this->rule_for_lines_dates);
 			$sql .= ", ".(!empty($this->date_when) ? "'".$this->db->idate($this->date_when)."'" : 'NULL');
 			$sql .= ", ".(!empty($this->date_last_gen) ? "'".$this->db->idate($this->date_last_gen)."'" : 'NULL');
 			$sql .= ", ".((int) $this->nb_gen_done);
@@ -407,6 +406,7 @@ class FactureRec extends CommonInvoice
 			$sql .= ", ".((float) $facsrc->multicurrency_tx);
 			$sql .= ", ".((int) $this->suspended);
 			$sql .= ", ".((int) $this->fk_societe_rib);
+			$sql .= ", ".(!empty($this->rule_for_lines_dates) ? ("'".$this->db->escape($this->rule_for_lines_dates)."'") : "NULL");
 			$sql .= ")";
 
 			if ($this->db->query($sql)) {
