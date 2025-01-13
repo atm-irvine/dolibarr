@@ -170,7 +170,7 @@ class pdf_standard_myobject extends ModelePDFMyObject
 	public function write_file($object, $outputlangs, $srctemplatepath = '', $hidedetails = 0, $hidedesc = 0, $hideref = 0)
 	{
 		// phpcs:enable
-		global $user, $langs, $conf, $mysoc, $db, $hookmanager, $nblines;
+		global $user, $langs, $conf, $mysoc, $hookmanager, $nblines;
 
 		dol_syslog("write_file outputlangs->defaultlang=".(is_object($outputlangs) ? $outputlangs->defaultlang : 'null'));
 
@@ -263,23 +263,25 @@ class pdf_standard_myobject extends ModelePDFMyObject
 		*/
 
 		//if (count($realpatharray) == 0) $this->posxpicture=$this->posxtva;
+		$dir_output = getMultidirOutput($object, $object->module);
+		if (!empty($dir_output)) {
+			$dir_output .= '/' . $object->element;
 
-		if (getMultidirOutput($object)) {
 			$object->fetch_thirdparty();
 
 			$dir = null;
 			// Definition of $dir and $file
 			if ($object->specimen) {
-				$dir = getMultidirOutput($object);
+				$dir = $dir_output;
 				$file = $dir."/SPECIMEN.pdf";
 			} else {
 				$objectref = dol_sanitizeFileName($object->ref);
-				$dir = getMultidirOutput($object)."/".$objectref;
+				$dir = $dir_output."/".$objectref;
 				$file = $dir."/".$objectref.".pdf";
 			}
-			if ($dir === null) {
-				return 0;
-			}
+			// if ($dir === null) {
+			// 	return 0;
+			// }
 			if (!file_exists($dir)) {
 				if (dol_mkdir($dir) < 0) {
 					$this->error = $langs->transnoentities("ErrorCanNotCreateDir", $dir);
@@ -837,7 +839,7 @@ class pdf_standard_myobject extends ModelePDFMyObject
 
 	// phpcs:disable PEAR.NamingConventions.ValidFunctionName.ScopeNotCamelCaps
 	/**
-	 *  Return list of active generation modules
+	 *  Return list of active generation models
 	 *
 	 *  @param  DoliDB  	$db					Database handler
 	 *  @param  int<0,max>	$maxfilenamelength	Max length of value to show
@@ -854,8 +856,8 @@ class pdf_standard_myobject extends ModelePDFMyObject
 	 *	Show table for lines
 	 *
 	 *	@param	TCPDF|TCPDI	$pdf     		Object PDF
-	 *	@param	int			$tab_top		Top position of table
-	 *	@param	int			$tab_height		Height of table (rectangle)
+	 *	@param	float		$tab_top		Top position of table
+	 *	@param	float		$tab_height		Height of table (rectangle)
 	 *	@param	int			$nexY			Y (not used)
 	 *	@param	Translate	$outputlangs	Langs object
 	 *	@param	int<-1,1>	$hidetop		1=Hide top bar of array and title, 0=Hide nothing, -1=Hide only title
