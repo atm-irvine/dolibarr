@@ -128,6 +128,19 @@ $extrafields->fetch_name_optionals_label($object->table_element);
 
 $search_array_options = $extrafields->getOptionalsFromPost($object->table_element, '', 'search_');
 
+$sall = GETPOST('search_all', 'alphanohtml') ? GETPOST('search_all', 'alphanohtml') : GETPOST('sall', 'alphanohtml');
+
+$fieldstosearchall = [
+	'p.label' => 'Product',
+	's.nom' => 'ThirdParty',
+];
+$parameters = ['fieldstosearchall' => $fieldstosearchall];
+$reshook = $hookmanager->executeHooks('completeFieldsToSearchAll', $parameters, $object, $action);
+if ($reshook < 0) {
+	setEventMessages($hookmanager->error, $hookmanager->errors, 'errors');
+}
+$fieldstosearchall = array_merge($fieldstosearchall, $hookmanager->resArray);
+
 // Security check
 $contratid = GETPOSTINT('id');
 if (!empty($user->socid)) {
@@ -289,6 +302,12 @@ $sql .= " ".MAIN_DB_PREFIX."contratdet as cd";
 if (!empty($extrafields->attributes[$object->table_element]['label']) && is_array($extrafields->attributes[$object->table_element]['label']) && count($extrafields->attributes[$object->table_element]['label'])) {
 	$sql .= " LEFT JOIN ".MAIN_DB_PREFIX.$object->table_element."_extrafields as ef on (cd.rowid = ef.fk_object)";
 }
+
+// Add table from hooks
+$parameters = [];
+$reshook = $hookmanager->executeHooks('printFieldListFrom', $parameters, $object); // Note that $action and $object may have been modified by hook
+$sql .= $hookmanager->resPrint;
+
 $sql .= " LEFT JOIN ".MAIN_DB_PREFIX."product as p ON cd.fk_product = p.rowid";
 if ($search_product_category > 0) {
 	$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'categorie_product as cp ON cp.fk_product=cd.fk_product';
@@ -406,6 +425,9 @@ if (!empty($filter_opcloture) && $filter_opcloture != ' BETWEEN ' && $filter_opc
 if (!empty($filter_opcloture) && $filter_opcloture == ' BETWEEN ') {
 	$sql .= " AND cd.date_cloture ".$filter_opcloture." '".$db->idate($filter_datecloture_start)."' AND '".$db->idate($filter_datecloture_end)."'";
 }
+if ($sall) {
+	$sql .= natural_search(array_keys($fieldstosearchall), $sall);
+}
 // Add where from extra fields
 include DOL_DOCUMENT_ROOT.'/core/tpl/extrafields_list_search_sql.tpl.php';
 
@@ -464,6 +486,9 @@ if (!empty($contextpage) && $contextpage != $_SERVER["PHP_SELF"]) {
 }
 if ($limit > 0 && $limit != $conf->liste_limit) {
 	$param .= '&limit='.((int) $limit);
+}
+if ($sall != '') {
+	$param .= '&sall='.urlencode($sall);
 }
 if ($optioncss != '') {
 	$param .= '&optioncss='.urlencode($optioncss);
