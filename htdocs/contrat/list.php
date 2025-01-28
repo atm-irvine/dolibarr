@@ -412,6 +412,14 @@ if ($search_sale && $search_sale != '-1') {
 		$sql .= " AND EXISTS (SELECT sc.fk_soc FROM ".MAIN_DB_PREFIX."societe_commerciaux as sc WHERE sc.fk_soc = c.fk_soc AND sc.fk_user = ".((int) $search_sale).")";
 	}
 }
+if ($search_status != '-1' && $search_status != '') {
+	if (is_numeric($search_status) && $search_status >= 0) {
+		$sql .= " AND c.statut = " . $search_status;
+	} else {
+		$sql .= " AND c.statut IN (".$db->sanitize($db->escape($search_status)).")"; // When search_status is '1,2' for example
+	}
+}
+
 // Search for tag/category ($searchCategoryProductList is an array of ID)
 $searchCategoryProductOperator = -1;
 $searchCategoryProductList = array($search_product_category);

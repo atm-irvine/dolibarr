@@ -1443,6 +1443,10 @@ function get_left_menu_commercial($mainmenu, &$newmenu, $usemenuhider = 1, $left
 			$newmenu->add("/contrat/index.php?leftmenu=contracts", $langs->trans("ContractsSubscriptions"), 0, $user->hasRight('contrat', 'lire'), '', $mainmenu, 'contracts', 2000, '', '', '', img_picto('', 'contract', 'class="paddingright pictofixedwidth"'));
 			$newmenu->add("/contrat/card.php?action=create&amp;leftmenu=contracts", $langs->trans("NewContractSubscription"), 1, $user->hasRight('contrat', 'creer'));
 			$newmenu->add("/contrat/list.php?leftmenu=contracts", $langs->trans("List"), 1, $user->hasRight('contrat', 'lire'));
+			if ($usemenuhider || empty($leftmenu) || preg_match('/contracts(|_draft|_validated)$/', $leftmenu)) {
+				$newmenu->add("/contrat/list.php?leftmenu=contracts_draft&amp;search_status=0", $langs->trans("ContractStatusDraft"), 2, $user->hasRight('contrat',  'lire'));
+				$newmenu->add("/contrat/list.php?leftmenu=contracts_validated&amp;search_status=1", $langs->trans("ContractStatusValidated"), 2, $user->hasRight('contrat',  'lire'));
+			}
 			$newmenu->add("/contrat/services_list.php?leftmenu=contracts", $langs->trans("MenuServices"), 1, $user->hasRight('contrat', 'lire'));
 			if ($usemenuhider || empty($leftmenu) || $leftmenu == "contracts") {
 				$newmenu->add("/contrat/services_list.php?leftmenu=contracts&amp;search_status=0", $langs->trans("MenuInactiveServices"), 2, $user->hasRight('contrat', 'lire'));
