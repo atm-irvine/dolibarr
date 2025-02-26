@@ -347,6 +347,51 @@ class Proposals extends DolibarrApi
 	}
 
 	/**
+	 * Get lines of a commercial proposal with pagination
+	 *
+	 * @param $id Id of proposal
+	 * @param $limit Limit of lines to return
+	 * @param $page Page number
+	 *
+	 * @url GET {id}/lines/paginated
+	 *
+	 * @return array
+	 */
+	public function getLinesPaginated($id, $limit = 10, $page = 0)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('propal', 'lire')) {
+			throw new RestException(403);
+		}
+
+		$result = $this->propal->fetch($id);
+		if (!$result) {
+			throw new RestException(404, 'Commercial Proposal not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('propal', $this->propal->id)) {
+			throw new RestException(403, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$this->propal->getLinesArray();
+		$result = array();
+
+		if ($page < 0) $page = 0;
+		$offset = $page * $limit;
+		$lines = array_slice($this->propal->lines, $offset, $limit);
+
+		foreach ($lines as $line) {
+			array_push($result, $this->_cleanObjectDatas($line));
+		}
+
+		return [
+			'total' => count($this->propal->lines),
+			'limit' => $limit,
+			'page' => $page,
+			'data' => $result
+		];
+	}
+
+	/**
 	 * Add a line to given commercial proposal
 	 *
 	 * @param int   $id             Id of commercial proposal to update

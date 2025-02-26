@@ -471,6 +471,51 @@ class Invoices extends DolibarrApi
 	}
 
 	/**
+	 * Get lines of an invoice with pagination
+	 *
+	 * @param $id Id of invoice
+	 * @param $limit Limit of lines to return
+	 * @param $page Page number
+	 *
+	 * @url GET {id}/lines/paginated
+	 *
+	 * @return array
+	 */
+	public function getLinesPaginated($id, $limit = 10, $page = 0)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('facture', 'lire')) {
+			throw new RestException(403);
+		}
+
+		$result = $this->invoice->fetch($id);
+		if (!$result) {
+			throw new RestException(404, 'Invoice not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('facture', $this->invoice->id)) {
+			throw new RestException(403, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$this->invoice->getLinesArray();
+		$result = array();
+
+		if ($page < 0) $page = 0;
+		$offset = $page * $limit;
+		$lines = array_slice($this->invoice->lines, $offset, $limit);
+
+		foreach ($lines as $line) {
+			array_push($result, $this->_cleanObjectDatas($line));
+		}
+
+		return [
+			'total' => count($this->invoice->lines),
+			'limit' => $limit,
+			'page' => $page,
+			'data' => $result
+		];
+	}
+
+	/**
 	 * Update a line to a given invoice
 	 *
 	 * @param	int   $id             Id of invoice to update
