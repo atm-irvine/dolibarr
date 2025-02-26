@@ -357,6 +357,51 @@ class Orders extends DolibarrApi
 	}
 
 	/**
+	 * Get lines of an order with pagination
+	 *
+	 * @param $id Id of order
+	 * @param $limit Limit of lines to return
+	 * @param $page Page number
+	 *
+	 * @url GET {id}/lines/paginated
+	 *
+	 * @return array
+	 */
+	public function getLinesPaginated($id, $limit = 10, $page = 0)
+	{
+		if (!DolibarrApiAccess::$user->hasRight('commande', 'lire')) {
+			throw new RestException(403);
+		}
+
+		$result = $this->commande->fetch($id);
+		if (!$result) {
+			throw new RestException(404, 'Order not found');
+		}
+
+		if (!DolibarrApi::_checkAccessToResource('commande', $this->commande->id)) {
+			throw new RestException(403, 'Access not allowed for login '.DolibarrApiAccess::$user->login);
+		}
+
+		$this->commande->getLinesArray();
+		$result = array();
+
+		if ($page < 0) $page = 0;
+		$offset = $page * $limit;
+		$lines = array_slice($this->commande->lines, $offset, $limit);
+
+		foreach ($lines as $line) {
+			array_push($result, $this->_cleanObjectDatas($line));
+		}
+
+		return [
+			'total' => count($this->commande->lines),
+			'limit' => $limit,
+			'page' => $page,
+			'data' => $result
+		];
+	}
+
+	/**
 	 * Add a line to given order
 	 *
 	 * @param int   $id             Id of order to update
