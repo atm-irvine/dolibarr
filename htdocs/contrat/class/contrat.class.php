@@ -710,32 +710,78 @@ class Contrat extends CommonObject
 	 */
 	public function fetch($id, $ref = '', $ref_customer = '', $ref_supplier = '', $noextrafields = 0, $nolines = 0)
 	{
+		$doFetchInOneSqlRequest = getDolGlobalInt('MAIN_DO_FETCH_IN_ONE_SQL_REQUEST');
+
+		if ($doFetchInOneSqlRequest && !$noextrafields) {
+			global $conf, $extrafields;
+
+			// If $extrafields is not a known object, we initialize it
+			if (!isset($extrafields) || !is_object($extrafields)) {
+				require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+				$extrafields = new ExtraFields($this->db);
+			}
+
+			// Load array of extrafields for elementype = $this->table_element
+			if (empty($extrafields->attributes[$this->table_element]['loaded'])) {
+				$extrafields->fetch_name_optionals_label($this->table_element);
+			}
+
+			$extraFieldsCheck = (
+				!empty($extrafields->attributes[$this->table_element]['label'])
+				&& is_array($extrafields->attributes[$this->table_element]['label'])
+				&& count($extrafields->attributes[$this->table_element]['label']) > 0
+			);
+		}
+
 		$result = -10;
 
-		$sql = "SELECT rowid, statut as status, ref, fk_soc as thirdpartyid,";
-		$sql .= " ref_supplier, ref_customer,";
-		$sql .= " ref_ext,";
-		$sql .= " entity,";
-		$sql .= " signed_status,";
-		$sql .= " date_contrat as datecontrat,";
-		$sql .= " fk_user_author,";
-		$sql .= " fk_projet as fk_project,";
-		$sql .= " fk_commercial_signature, fk_commercial_suivi,";
-		$sql .= " note_private, note_public, model_pdf, last_main_doc, extraparams";
-		$sql .= " FROM ".MAIN_DB_PREFIX."contrat";
+		$sql = "SELECT c.rowid, c.statut as status, c.ref, c.fk_soc as thirdpartyid,";
+		$sql .= " c.ref_supplier, c.ref_customer,";
+		$sql .= " c.ref_ext,";
+		$sql .= " c.entity,";
+		$sql .= " c.signed_status,";
+		$sql .= " c.date_contrat as datecontrat,";
+		$sql .= " c.fk_user_author,";
+		$sql .= " c.fk_projet as fk_project,";
+		$sql .= " c.fk_commercial_signature, c.fk_commercial_suivi,";
+		$sql .= " c.note_private, c.note_public, c.model_pdf, c.last_main_doc, c.extraparams";
+
+		if ($doFetchInOneSqlRequest && $extraFieldsCheck && !$noextrafields) {
+			foreach ($extrafields->attributes[$this->table_element]['label'] as $key => $val) {
+				$type = !empty($extrafields->attributes[$this->table_element]['type'][$key])
+					? $extrafields->attributes[$this->table_element]['type'][$key]
+					: '';
+
+				if ($type !== 'separate') {
+					if (in_array($type, array('point','multipts','linestrg','polygon'))) {
+						$sql .= ", ST_AsWKT(ef.".$key.") as ".$key;
+					} else {
+						$sql .= ", ef.".$key;
+					}
+				}
+			}
+		}
+
+		$sql .= " FROM ".MAIN_DB_PREFIX."contrat as c";
+
+		if ($doFetchInOneSqlRequest && $extraFieldsCheck) {
+			// Add LEFT JOIN for extrafields
+			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ef ON c.rowid = ef.fk_object';
+		}
+
 		if (!$id) {
-			$sql .= " WHERE entity IN (".getEntity('contract').")";
+			$sql .= " WHERE c.entity IN (".getEntity('contract').")";
 		} else {
-			$sql .= " WHERE rowid = ".(int) $id;
+			$sql .= " WHERE c.rowid = ".(int) $id;
 		}
 		if ($ref_customer) {
-			$sql .= " AND ref_customer = '".$this->db->escape($ref_customer)."'";
+			$sql .= " AND c.ref_customer = '".$this->db->escape($ref_customer)."'";
 		}
 		if ($ref_supplier) {
-			$sql .= " AND ref_supplier = '".$this->db->escape($ref_supplier)."'";
+			$sql .= " AND c.ref_supplier = '".$this->db->escape($ref_supplier)."'";
 		}
 		if ($ref) {
-			$sql .= " AND ref = '".$this->db->escape($ref)."'";
+			$sql .= " AND c.ref = '".$this->db->escape($ref)."'";
 		}
 
 		dol_syslog(get_class($this)."::fetch", LOG_DEBUG);
@@ -780,11 +826,49 @@ class Contrat extends CommonObject
 					$this->last_main_doc = $obj->last_main_doc;
 					$this->extraparams = (isset($obj->extraparams) ? (array) json_decode($obj->extraparams, true) : null);
 
+					// Now process extrafields
+					$this->array_options = array();
+					if ($doFetchInOneSqlRequest && $extraFieldsCheck && !$noextrafields) {
+						foreach ($extrafields->attributes[$this->table_element]['label'] as $key => $val) {
+							$type = !empty($extrafields->attributes[$this->table_element]['type'][$key])
+								? $extrafields->attributes[$this->table_element]['type'][$key]
+								: '';
+
+							if ($type !== 'separate') {
+								$rawval = $obj->$key;
+
+								// date/datetime
+								if (in_array($type, array('date', 'datetime'))) {
+									$this->array_options['options_' . $key] = $this->db->jdate($rawval);
+								} elseif ($type == 'password') {
+									if (!empty($rawval) && preg_match('/^dolcrypt:/', $rawval)) {
+										$this->array_options['options_' . $key] = dolDecrypt($rawval);
+									} else {
+										$this->array_options['options_' . $key] = $rawval;
+									}
+								} else {
+									$this->array_options['options_' . $key] = $rawval;
+								}
+							}
+						}
+
+						// Champs "computed"
+						foreach ($extrafields->attributes[$this->table_element]['label'] as $key => $val) {
+							if (!empty($extrafields->attributes[$this->table_element]['computed'][$key])) {
+								if (empty($conf->disable_compute)) {
+									global $objectoffield;
+									$objectoffield = $this;
+									$this->array_options['options_' . $key] = dol_eval($extrafields->attributes[$this->table_element]['computed'][$key], 1, 0, '2');
+								}
+							}
+						}
+					}
+
 					$this->db->free($resql);
 
 					// Retrieve all extrafields
 					// fetch optionals attributes and labels
-					if (empty($noextrafields)) {
+					if (!$doFetchInOneSqlRequest && !$noextrafields) {
 						$result = $this->fetch_optionals();
 						if ($result < 0) {
 							$this->error = $this->db->lasterror();
@@ -833,6 +917,29 @@ class Contrat extends CommonObject
 	 */
 	public function fetch_lines($only_services = 0, $loadalsotranslation = 0, $noextrafields = 0)
 	{
+		$doFetchInOneSqlRequest = getDolGlobalInt('MAIN_DO_FETCH_IN_ONE_SQL_REQUEST');
+
+		if ($doFetchInOneSqlRequest && !$noextrafields) {
+			global $conf, $extrafields;
+
+			// If $extrafields is not a known object, we initialize it
+			if (!isset($extrafields) || !is_object($extrafields)) {
+				require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
+				$extrafields = new ExtraFields($this->db);
+			}
+
+			// Load array of extrafields for elementype = $this->table_element
+			if (empty($extrafields->attributes[$this->table_element_line]['loaded'])) {
+				$extrafields->fetch_name_optionals_label($this->table_element_line);
+			}
+
+			$extraFieldsCheck = (
+				!empty($extrafields->attributes[$this->table_element_line]['label'])
+				&& is_array($extrafields->attributes[$this->table_element_line]['label'])
+				&& count($extrafields->attributes[$this->table_element_line]['label']) > 0
+			);
+		}
+
 		// phpcs:enable
 		$this->nbofservices = 0;
 		$this->nbofserviceswait = 0;
@@ -868,7 +975,30 @@ class Contrat extends CommonObject
 		$sql .= " d.fk_unit,";
 		$sql .= " d.product_type as type,";
 		$sql .= " d.rang";
-		$sql .= " FROM ".MAIN_DB_PREFIX."contratdet as d LEFT JOIN ".MAIN_DB_PREFIX."product as p ON d.fk_product = p.rowid";
+
+		if ($doFetchInOneSqlRequest && $extraFieldsCheck && !$noextrafields) {
+			foreach ($extrafields->attributes[$this->table_element_line]['label'] as $key => $val) {
+				$type = !empty($extrafields->attributes[$this->table_element_line]['type'][$key])
+					? $extrafields->attributes[$this->table_element_line]['type'][$key]
+					: '';
+
+				if ($type !== 'separate') {
+					if (in_array($type, array('point','multipts','linestrg','polygon'))) {
+						$sql .= ", ST_AsWKT(ef.".$key.") as ".$key;
+					} else {
+						$sql .= ", ef.".$key;
+					}
+				}
+			}
+		}
+
+		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element_line." as d LEFT JOIN ".$this->db->prefix()."product as p ON d.fk_product = p.rowid";
+
+		if ($doFetchInOneSqlRequest && $extraFieldsCheck && !$noextrafields) {
+			// Add LEFT JOIN for extrafields
+			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.$this->table_element_line.'_extrafields as ef ON d.rowid = ef.fk_object';
+		}
+
 		$sql .= " WHERE d.fk_contrat = ".((int) $this->id);
 		if ($only_services == 1) {
 			$sql .= " AND d.product_type = 1";
@@ -945,9 +1075,47 @@ class Contrat extends CommonObject
 
 				$line->rang     = $objp->rang;
 
+				// Now process extrafields
+				$this->array_options = array();
+				if ($doFetchInOneSqlRequest && $extraFieldsCheck && !$noextrafields) {
+					foreach ($extrafields->attributes[$this->table_element_line]['label'] as $key => $val) {
+						$type = !empty($extrafields->attributes[$this->table_element_line]['type'][$key])
+							? $extrafields->attributes[$this->table_element_line]['type'][$key]
+							: '';
+
+						if ($type !== 'separate') {
+							$rawval = $objp->$key;
+
+							// date/datetime
+							if (in_array($type, array('date', 'datetime'))) {
+								$this->array_options['options_' . $key] = $this->db->jdate($rawval);
+							} elseif ($type == 'password') {
+								if (!empty($rawval) && preg_match('/^dolcrypt:/', $rawval)) {
+									$this->array_options['options_' . $key] = dolDecrypt($rawval);
+								} else {
+									$this->array_options['options_' . $key] = $rawval;
+								}
+							} else {
+								$this->array_options['options_' . $key] = $rawval;
+							}
+						}
+					}
+
+					// Champs "computed"
+					foreach ($extrafields->attributes[$this->table_element_line]['label'] as $key => $val) {
+						if (!empty($extrafields->attributes[$this->table_element_line]['computed'][$key])) {
+							if (empty($conf->disable_compute)) {
+								global $objectoffield;
+								$objectoffield = $this;
+								$this->array_options['options_' . $key] = dol_eval($extrafields->attributes[$this->table_element_line]['computed'][$key], 1, 0, '2');
+							}
+						}
+					}
+				}
+
 				// Retrieve all extrafields for contract line
 				// fetch optionals attributes and labels
-				if (empty($noextrafields)) {
+				if (!$noextrafields && !$doFetchInOneSqlRequest) {
 					$line->fetch_optionals();
 				}
 
