@@ -1986,19 +1986,19 @@ class Commande extends CommonOrder
 			}
 		}
 
-		$sql .= ' FROM '.MAIN_DB_PREFIX.$this->table_element.' as c';
+		$sql .= ' FROM '.$this->db->prefix().$this->table_element.' as c';
 
 		// Add extrafields table to the join if we have extrafields for this entity
 		if ($doFetchInOneSqlRequest && $extraFieldsCheck) {
 			// Add LEFT JOIN for extrafields
-			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.$table_element.'_extrafields as ef ON c.rowid = ef.fk_object';
+			$sql .= ' LEFT JOIN '.$this->db->prefix().$table_element.'_extrafields as ef ON c.rowid = ef.fk_object';
 		}
 
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_payment_term as cr ON c.fk_cond_reglement = cr.rowid';
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_paiement as p ON c.fk_mode_reglement = p.id';
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_availability as ca ON c.fk_availability = ca.rowid';
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_input_reason as dr ON c.fk_input_reason = dr.rowid';
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'c_incoterms as i ON c.fk_incoterms = i.rowid';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'c_payment_term as cr ON c.fk_cond_reglement = cr.rowid';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'c_paiement as p ON c.fk_mode_reglement = p.id';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'c_availability as ca ON c.fk_availability = ca.rowid';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'c_input_reason as dr ON c.fk_input_reason = dr.rowid';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'c_incoterms as i ON c.fk_incoterms = i.rowid';
 
 		if ($id) {
 			$sql .= " WHERE c.rowid = ".((int) $id);
@@ -2286,15 +2286,15 @@ class Commande extends CommonOrder
 			}
 		}
 
-		$sql .= ' FROM '.MAIN_DB_PREFIX.$this->table_element_line.' as l';
+		$sql .= ' FROM '.$this->db->prefix().$this->table_element_line.' as l';
 
 		// Add extrafields table to the join if we have extrafields for this entity
 		if ($doFetchInOneSqlRequest && $extraFieldsCheck) {
 			// Add LEFT JOIN for extrafields
-			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.$this->table_element_line.'_extrafields as ef ON l.rowid = ef.fk_object';
+			$sql .= ' LEFT JOIN '.$this->db->prefix().$this->table_element_line.'_extrafields as ef ON l.rowid = ef.fk_object';
 		}
 
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON (p.rowid = l.fk_product)';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'product as p ON (p.rowid = l.fk_product)';
 		$sql .= ' WHERE l.fk_commande = '.((int) $this->id);
 		if ($only_product) {
 			$sql .= ' AND p.fk_product_type = 0';

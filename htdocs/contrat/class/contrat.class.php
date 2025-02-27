@@ -762,11 +762,11 @@ class Contrat extends CommonObject
 			}
 		}
 
-		$sql .= " FROM ".MAIN_DB_PREFIX."contrat as c";
+		$sql .= " FROM ".$this->db->prefix()."contrat as c";
 
 		if ($doFetchInOneSqlRequest && $extraFieldsCheck) {
 			// Add LEFT JOIN for extrafields
-			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'contrat_extrafields as ef ON c.rowid = ef.fk_object';
+			$sql .= ' LEFT JOIN '.$this->db->prefix().'contrat_extrafields as ef ON c.rowid = ef.fk_object';
 		}
 
 		if (!$id) {
@@ -992,11 +992,11 @@ class Contrat extends CommonObject
 			}
 		}
 
-		$sql .= " FROM ".MAIN_DB_PREFIX.$this->table_element_line." as d LEFT JOIN ".$this->db->prefix()."product as p ON d.fk_product = p.rowid";
+		$sql .= " FROM ".$this->db->prefix().$this->table_element_line." as d LEFT JOIN ".$this->db->prefix()."product as p ON d.fk_product = p.rowid";
 
 		if ($doFetchInOneSqlRequest && $extraFieldsCheck && !$noextrafields) {
 			// Add LEFT JOIN for extrafields
-			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.$this->table_element_line.'_extrafields as ef ON d.rowid = ef.fk_object';
+			$sql .= ' LEFT JOIN '.$this->db->prefix().$this->table_element_line.'_extrafields as ef ON d.rowid = ef.fk_object';
 		}
 
 		$sql .= " WHERE d.fk_contrat = ".((int) $this->id);

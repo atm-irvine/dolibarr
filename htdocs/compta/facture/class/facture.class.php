@@ -2491,15 +2491,15 @@ class Facture extends CommonInvoice
 			}
 		}
 
-		$sql .= ' FROM '.MAIN_DB_PREFIX.'facturedet as l';
+		$sql .= ' FROM '.$this->db->prefix().'facturedet as l';
 
 		// Add extrafields table to the join if we have extrafields for this entity
 		if ($doFetchInOneSqlRequest && $extraFieldsCheck) {
 			// Add LEFT JOIN for extrafields
-			$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.$this->table_element_line.'_extrafields as ef ON l.rowid = ef.fk_object';
+			$sql .= ' LEFT JOIN '.$this->db->prefix().$this->table_element_line.'_extrafields as ef ON l.rowid = ef.fk_object';
 		}
 
-		$sql .= ' LEFT JOIN '.MAIN_DB_PREFIX.'product as p ON l.fk_product = p.rowid';
+		$sql .= ' LEFT JOIN '.$this->db->prefix().'product as p ON l.fk_product = p.rowid';
 		$sql .= ' WHERE l.fk_facture = '.((int) $this->id);
 		$sql .= ' ORDER BY l.rang, l.rowid';
 
