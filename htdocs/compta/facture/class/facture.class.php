@@ -2439,14 +2439,15 @@ class Facture extends CommonInvoice
 	 */
 	public function fetch_lines($only_product = 0, $loadalsotranslation = 0)
 	{
+		global $extrafields;
+
 		// phpcs:enable
 		$this->lines = array();
 
+		$extraFieldsCheck = false;
 		$doFetchInOneSqlRequest = getDolGlobalInt('MAIN_DO_FETCH_IN_ONE_SQL_REQUEST');
 
 		if ($doFetchInOneSqlRequest) {
-			global $extrafields;
-
 			// If $extrafields is not a known object, we initialize it
 			if (!isset($extrafields) || !is_object($extrafields)) {
 				require_once DOL_DOCUMENT_ROOT.'/core/class/extrafields.class.php';
